@@ -73,7 +73,6 @@ public class CucumberSteps extends CucumberConfiguration {
     public void createDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--start-maximized");
         MockitoAnnotations.openMocks(this);
         driver = new ChromeDriver(options);
         clearInvocations(mockedRepository);
