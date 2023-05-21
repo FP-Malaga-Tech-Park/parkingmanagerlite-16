@@ -1,5 +1,6 @@
 package com.hormigo.david.parkingmanager.bdd.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,6 +28,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.hormigo.david.parkingmanager.bdd.CucumberConfiguration;
 import com.hormigo.david.parkingmanager.core.exceptions.UserExistsException;
+import com.hormigo.david.parkingmanager.draw.domain.Draw;
+import com.hormigo.david.parkingmanager.draw.domain.DrawRepository;
+import com.hormigo.david.parkingmanager.draw.service.DrawServiceImpl;
 import com.hormigo.david.parkingmanager.user.domain.Role;
 import com.hormigo.david.parkingmanager.user.domain.User;
 import com.hormigo.david.parkingmanager.user.domain.UserRepository;
@@ -55,6 +59,12 @@ public class CucumberSteps extends CucumberConfiguration {
     @Spy
     @InjectMocks
     private UserServiceImpl mockedUserService;
+
+    @MockBean
+    private DrawRepository drawMockedRepository;
+    @Spy
+    @InjectMocks
+    private DrawServiceImpl mockedDrawService;
 
     @Value("${local.server.port}")
     private int port;
@@ -86,6 +96,12 @@ public class CucumberSteps extends CucumberConfiguration {
         when(mockedUserService.userExists(email)).thenReturn(false);
         when(mockedRepository.findByEmail(email)).thenReturn(null);
         
+    }
+
+    @Dado("el correo {} si esta asignado a otro usuario")
+    public void mockUserExists(String email){
+        when(mockedUserService.userExists(email)).thenReturn(true);
+        when(mockedRepository.findByEmail(email)).thenReturn(new User(email,"test","testApellido",Role.STUDENT));
     }
 
 
@@ -125,6 +141,16 @@ public class CucumberSteps extends CucumberConfiguration {
         verify(mockedRepository, times(1)).save(any(User.class));
     }
 
+    @Entonces("no se ha persistido el usuario en la base de datos")
+    public void checkUserWasNotSaved(){
+        verify(mockedRepository, times(0)).save(any(User.class));
+    }
+
+    @Entonces("se ha persistido el sorteo en la base de datos")
+    public void checkDrawWasSaved(){
+        verify(drawMockedRepository, times(1)).save(any(Draw.class));
+    }
+
 
     @Entonces("se muestra un campo de {}")
     public void fieldIsDisplayed(String fieldName) {
@@ -132,6 +158,22 @@ public class CucumberSteps extends CucumberConfiguration {
         WebElement field = driver.findElement(By.id(fieldId));
 
         assertTrue(field.isDisplayed());
+    }
+
+    @Entonces("se muestra un botón de {}")
+    public void btnIsDisplayed(String btnName){
+        String btnId = getBtnIdFromName(btnName);
+        WebElement btn = driver.findElement(By.id(btnId));
+        
+        assertTrue(btn.isDisplayed());
+    }
+
+    @Entonces("salta un error porque el {}")
+    public void errorIsDisplayed(String errorName) {
+        String errorMessage = getErrorMessageFromName(errorName);
+        String actualMessage = driver.findElement(By.id("hasErrors")).getText();
+        
+        assertEquals(errorMessage, actualMessage);
     }
 
     private String getUrlFromPageName(String pageName) {
@@ -178,6 +220,54 @@ public class CucumberSteps extends CucumberConfiguration {
 
     private String getUrlFromEndPoint(String endpoint) {
         return "http://localhost:" + port + endpoint;
+    }
+
+    private String getErrorMessageFromName(String errorName) {
+        String errorMessage = "";
+        switch (errorName) {
+            case "nombre está vacío":
+                errorMessage = "El nombre es obligatorio";
+                break;
+            case "primer apellido está vacío":
+                errorMessage = "El primer apellido es obligatorio";
+                break;
+            case "correo está vacío":
+                errorMessage = "El correo es obligatorio";
+                break;
+            case "correo ya existe":
+                errorMessage = "Ya existe el usuario con el correo";
+                break;
+            default:
+                break;
+        }
+        return errorMessage;
+    }
+
+    private String getBtnIdFromName(String btnName) {
+        String btnId = "";
+        switch (btnName) {
+            case "Usuarios":
+                btnId = "to-users-link";
+                break;
+            case "Sorteos":
+                btnId = "to-draws-link";
+                break;
+            case "crear usuario":
+                btnId = "user-create-button-submit";
+                break;
+            case "crear sorteo":
+                btnId = "draw-button-submit";
+                break;
+            case "creación de sorteo":
+                btnId = "draw-button-submit";
+                break;
+            case "creación de usuario":
+                btnId = "user-create-button-submit";
+                break;
+            default:
+                break;
+        }
+        return btnId;
     }
 
 }

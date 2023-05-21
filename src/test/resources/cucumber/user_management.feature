@@ -24,3 +24,37 @@ Característica: Gestion de usuarios
     Y el usuario hace click sobre el botón de crear usuario
     Entonces esta en la pagina de lista de usuarios
     Y se ha persistido el usuario en la base de datos
+
+    Escenario: Error al crear un usuario porque falta el nombre
+    Dado un usuario esta en la pagina creación de usuarios
+    Cuando relleno el campo correo electrónico con usuario@correo.com
+    Y relleno el campo primer apellido con testApellido
+    Y el usuario hace click sobre el botón de crear usuario
+    Entonces salta un error porque el nombre está vacío
+    Y no se ha persistido el usuario en la base de datos
+
+  Escenario: Error al crear un usuario porque falta el correo
+    Dado un usuario esta en la pagina creación de usuarios
+    Cuando relleno el campo nombre con test
+    Y relleno el campo primer apellido con testApellido
+    Y el usuario hace click sobre el botón de crear usuario
+    Entonces salta un error porque el correo está vacío
+    Y no se ha persistido el usuario en la base de datos
+
+  Escenario: Error al crear un usuario porque falta el primer apellido
+    Dado un usuario esta en la pagina creación de usuarios
+    Cuando relleno el campo nombre con test
+    Y relleno el campo correo electrónico con usuario@correo.com
+    Y el usuario hace click sobre el botón de crear usuario
+    Entonces salta un error porque el primer apellido está vacío
+    Y no se ha persistido el usuario en la base de datos
+
+  Escenario: Error al crear un usuario porque el correo ya existe
+    Dado un usuario esta en la pagina creación de usuarios
+    Y el correo usuario@correo.com si esta asignado a otro usuario
+    Cuando relleno el campo nombre con test
+    Y relleno el campo correo electrónico con usuario@correo.com
+    Y relleno el campo primer apellido con testApellido
+    Y el usuario hace click sobre el botón de crear usuario
+    Entonces salta un error porque el correo ya existe
+    Y no se ha persistido el usuario en la base de datos
